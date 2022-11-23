@@ -1,0 +1,19 @@
+---
+title: "About"
+image: imageofthecity.jpeg
+about:
+  template: jolla
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/Mboschm
+    - icon: mastodon
+      text: mastodon
+      href: https://mapstodon.space/@marcbosch
+    - icon: github
+      text: Github
+      href: https://github.com/marcboschmatas/
+
+---
+
+Aquí penjaré mapes, gràfics, idees que em passen pel cap. Moltes coses sobre ciutats.

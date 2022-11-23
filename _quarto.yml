@@ -1,0 +1,21 @@
+project:
+  type: website
+
+website:
+  title: "marcbosch"
+  navbar:
+    right:
+      - blog.qmd
+      - icon: github
+        href: https://github.com/marcboschmatas/
+      - icon: twitter
+        href: https://twitter.com/Mboschm
+      - icon: mastodon
+        href: https://mapstodon.space/@marcbosch
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+
+
+
