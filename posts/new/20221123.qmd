@@ -1,5 +1,6 @@
 ---
 title: "Tidy Tuesdays 23/11/2022"
+image: result.png
 author: "Marc Bosch"
 date: "2022-11-23"
 categories: [tidytuesday, ggplot, museus, R]
@@ -7,7 +8,6 @@ execute:
   warning: false
   error: false
   message: false
-image: result.png
 format:
   html: 
     code-fold: true
