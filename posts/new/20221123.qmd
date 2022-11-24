@@ -21,6 +21,7 @@ El [Tidy Tuesday](https://twitter.com/search?q=tidytuesday&src=typed_query) és 
 
 ```{r}
 # libraries
+#| output: false
 library(tidyverse)
 library(tidytuesdayR)
 library(knitr)
@@ -31,16 +32,9 @@ tt <- tidytuesdayR::tt_load(last_tuesday())[[1]]
 ```
 
 
-Vegem quina pinta fa
-
-```{r}
-knitr::kable(head(tt), style = "pipe")
-```
 
 
-
-
-Dedica diverses columnes a índexs de deprivació. Podem fer un retrat robot dels museus en cinc àrees segons índex de deprivació: molt baix, baix, mitjà, alt, molt alt.
+La base de dades recull tot d'informació sobre els museus del Regne Unit: on són, quina mida tenen, de què van... Dedica diverses columnes a índexs de deprivació. Podem fer un retrat robot dels museus en cinc àrees segons índex de deprivació: molt baix, baix, mitjà, alt, molt alt.
 
 
 ```{r}
@@ -59,7 +53,8 @@ tt <- tt |>
 
 
 ```{r}
-#| fig-width: 15
+#| fig.width: 15
+#| fig-alt: Three bar plots. One counts the number of museums grouped by area deprivation index. The second one counts them by area deprivation index and titularity and the third one by size and area deprivation index.
 p1 <- ggplot(tt,
              aes(x = deprivation_index_quantiles)) + 
   geom_bar(colour = "black",

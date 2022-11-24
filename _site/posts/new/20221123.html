@@ -219,407 +219,97 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <details>
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># libraries</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytuesdayR)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modthemes)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># get data</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> tidytuesdayR<span class="sc">::</span><span class="fu">tt_load</span>(<span class="fu">last_tuesday</span>())[[<span class="dv">1</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: false</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytuesdayR)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modthemes)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># get data</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> tidytuesdayR<span class="sc">::</span><span class="fu">tt_load</span>(<span class="fu">last_tuesday</span>())[[<span class="dv">1</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Downloading file 1 of 1: `museums.csv`</code></pre>
 </div>
 </div>
-<p>Vegem quina pinta fa</p>
+<p>La base de dades recull tot d’informació sobre els museus del Regne Unit: on són, quina mida tenen, de què van… Dedica diverses columnes a índexs de deprivació. Podem fer un retrat robot dels museus en cinc àrees segons índex de deprivació: molt baix, baix, mitjà, alt, molt alt.</p>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(tt), <span class="at">style =</span> <span class="st">"pipe"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Area_Deprivation_index)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">"deprivation_index_quantiles"</span> <span class="ot">=</span> <span class="fu">cut</span>(Area_Deprivation_index,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">10</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Molt alt"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Alt"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Mitjà"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Baix"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Molt baix"</span>))) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tt,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> deprivation_index_quantiles)) <span class="sc">+</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">colour =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="cn">NA</span>) <span class="sc">+</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_family =</span> <span class="st">"Roboto condensed"</span>) <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Número de museus per àrea"</span>) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>proportions <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">"titularitat"</span> <span class="ot">=</span> <span class="fu">str_extract</span>(Governance,<span class="st">".*(?=</span><span class="sc">\\</span><span class="st">-)"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deprivation_index_quantiles) <span class="sc">|&gt;</span> </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>())</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">titularitat =</span> <span class="fu">str_extract</span>(Governance,<span class="st">".*(?=</span><span class="sc">\\</span><span class="st">-)"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(titularitat, deprivation_index_quantiles) <span class="sc">|&gt;</span> </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_td =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(proportions, <span class="at">by =</span> <span class="st">"deprivation_index_quantiles"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n_td<span class="sc">/</span>n,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">titularitat =</span> <span class="fu">case_when</span>(titularitat <span class="sc">==</span> <span class="st">"Independent"</span> <span class="sc">~</span> <span class="st">"Privada"</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                                 titularitat <span class="sc">==</span> <span class="st">"Government"</span> <span class="sc">~</span> <span class="st">"Pública"</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">is.na</span>(titularitat) <span class="sc">~</span> <span class="st">"Desconeguda"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> deprivation_index_quantiles,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> prop,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> titularitat)) <span class="sc">+</span> </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>,</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span> </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> modthemes<span class="sc">::</span>contrasting_palette) <span class="sc">+</span> </span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Titularitat dels museus per índex de deprivació"</span>) <span class="sc">+</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_family =</span> <span class="st">"Roboto condensed"</span>) <span class="sc">+</span> </span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">"mida_cat"</span> <span class="ot">=</span> <span class="fu">factor</span>(Size,</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>                             <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"small"</span>, <span class="st">"medium"</span>, <span class="st">"large"</span>, <span class="st">"huge"</span>, <span class="st">"unknown"</span>),</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>                             <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"petit"</span>, <span class="st">"mitjà"</span>, <span class="st">"gran"</span>, <span class="st">"molt gran"</span>, <span class="st">"NS"</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deprivation_index_quantiles, mida_cat) <span class="sc">|&gt;</span> </span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_dt =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(proportions, <span class="at">by =</span> <span class="st">"deprivation_index_quantiles"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n_dt<span class="sc">/</span>n) <span class="sc">|&gt;</span> </span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> deprivation_index_quantiles,</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> prop,</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> mida_cat)) <span class="sc">+</span> </span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>,</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span> </span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> modthemes<span class="sc">::</span>contrasting_palette) <span class="sc">+</span> </span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Museus per mida i índex de deprivació"</span>) <span class="sc">+</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_family =</span> <span class="st">"Roboto condensed"</span>) <span class="sc">+</span> </span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span> p3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<table class="table table-sm table-striped">
-<colgroup>
-<col style="width: 1%">
-<col style="width: 3%">
-<col style="width: 3%">
-<col style="width: 2%">
-<col style="width: 2%">
-<col style="width: 0%">
-<col style="width: 0%">
-<col style="width: 0%">
-<col style="width: 11%">
-<col style="width: 1%">
-<col style="width: 2%">
-<col style="width: 0%">
-<col style="width: 2%">
-<col style="width: 3%">
-<col style="width: 1%">
-<col style="width: 1%">
-<col style="width: 2%">
-<col style="width: 1%">
-<col style="width: 2%">
-<col style="width: 3%">
-<col style="width: 2%">
-<col style="width: 2%">
-<col style="width: 3%">
-<col style="width: 3%">
-<col style="width: 2%">
-<col style="width: 3%">
-<col style="width: 2%">
-<col style="width: 3%">
-<col style="width: 2%">
-<col style="width: 3%">
-<col style="width: 2%">
-<col style="width: 3%">
-<col style="width: 3%">
-<col style="width: 3%">
-<col style="width: 5%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">museum_id</th>
-<th style="text-align: left;">Name_of_museum</th>
-<th style="text-align: left;">Address_line_1</th>
-<th style="text-align: left;">Address_line_2</th>
-<th style="text-align: left;">Village,_Town_or_City</th>
-<th style="text-align: left;">Postcode</th>
-<th style="text-align: right;">Latitude</th>
-<th style="text-align: right;">Longitude</th>
-<th style="text-align: left;">Admin_area</th>
-<th style="text-align: left;">Accreditation</th>
-<th style="text-align: left;">Governance</th>
-<th style="text-align: left;">Size</th>
-<th style="text-align: left;">Size_provenance</th>
-<th style="text-align: left;">Subject_Matter</th>
-<th style="text-align: left;">Year_opened</th>
-<th style="text-align: left;">Year_closed</th>
-<th style="text-align: left;">DOMUS_Subject_Matter</th>
-<th style="text-align: right;">DOMUS_identifier</th>
-<th style="text-align: left;">Primary_provenance_of_data</th>
-<th style="text-align: left;">Identifier_used_in_primary_data_source</th>
-<th style="text-align: right;">Area_Deprivation_index</th>
-<th style="text-align: right;">Area_Deprivation_index_crime</th>
-<th style="text-align: right;">Area_Deprivation_index_education</th>
-<th style="text-align: right;">Area_Deprivation_index_employment</th>
-<th style="text-align: right;">Area_Deprivation_index_health</th>
-<th style="text-align: right;">Area_Deprivation_index_housing</th>
-<th style="text-align: right;">Area_Deprivation_index_income</th>
-<th style="text-align: right;">Area_Deprivation_index_services</th>
-<th style="text-align: left;">Area_Geodemographic_group</th>
-<th style="text-align: left;">Area_Geodemographic_group_code</th>
-<th style="text-align: left;">Area_Geodemographic_subgroup</th>
-<th style="text-align: left;">Area_Geodemographic_subgroup_code</th>
-<th style="text-align: left;">Area_Geodemographic_supergroup</th>
-<th style="text-align: left;">Area_Geodemographic_supergroup_code</th>
-<th style="text-align: left;">Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">mm.New.1</td>
-<td style="text-align: left;">Titanic Belfast</td>
-<td style="text-align: left;">1 Olympic Way</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">Belfast</td>
-<td style="text-align: left;">BT3 9EP</td>
-<td style="text-align: right;">54.60808</td>
-<td style="text-align: right;">-5.909915</td>
-<td style="text-align: left;">/Northern Ireland/Belfast (NI Loc Gov District)</td>
-<td style="text-align: left;">Unaccredited</td>
-<td style="text-align: left;">Independent-Not_for_profit</td>
-<td style="text-align: left;">large</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">Sea_and_seafaring-Boats_and_ships</td>
-<td style="text-align: left;">2012:2012</td>
-<td style="text-align: left;">9999:9999</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: left;">New</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: left;">Larger Towns and Cities</td>
-<td style="text-align: left;">2ar</td>
-<td style="text-align: left;">Larger Towns and Cities</td>
-<td style="text-align: left;">2a1r</td>
-<td style="text-align: left;">Business Education and Heritage Centres</td>
-<td style="text-align: left;">2r</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">mm.aim.1230</td>
-<td style="text-align: left;">The Woodland Heritage Museum</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">Brokerswood</td>
-<td style="text-align: left;">nr Westbury</td>
-<td style="text-align: left;">BA13 4EH</td>
-<td style="text-align: right;">51.27090</td>
-<td style="text-align: right;">-2.231863</td>
-<td style="text-align: left;">/England/South West (English Region)/Wiltshire (English UA)</td>
-<td style="text-align: left;">Unaccredited</td>
-<td style="text-align: left;">Independent-Unknown</td>
-<td style="text-align: left;">small</td>
-<td style="text-align: left;">aim_size_designation</td>
-<td style="text-align: left;">Natural_world-Other</td>
-<td style="text-align: left;">1971:1971</td>
-<td style="text-align: left;">2007:2017</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: left;">aim</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">9</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">9</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: left;">Country Living</td>
-<td style="text-align: left;">7ar</td>
-<td style="text-align: left;">Country Living</td>
-<td style="text-align: left;">7a1r</td>
-<td style="text-align: left;">Town and Country Living</td>
-<td style="text-align: left;">7r</td>
-<td style="text-align: left;">Previously known as Phillips Countryside Museum (until 1997)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">mm.domus.WM019</td>
-<td style="text-align: left;">Warwickshire Museum Of Rural Life</td>
-<td style="text-align: left;">Warwick College of Agriculture</td>
-<td style="text-align: left;">Horticulture &amp; Equine Studies</td>
-<td style="text-align: left;">Moreton Morrell</td>
-<td style="text-align: left;">CV35 9BL</td>
-<td style="text-align: right;">52.19715</td>
-<td style="text-align: right;">-1.555528</td>
-<td style="text-align: left;">/England/West Midlands (English Region)/Warwickshire (English County)/Stratford-on-Avon (English District or Borough)</td>
-<td style="text-align: left;">Unaccredited</td>
-<td style="text-align: left;">Government-Local_Authority</td>
-<td style="text-align: left;">medium</td>
-<td style="text-align: left;">mm_prediction_random_forest</td>
-<td style="text-align: left;">Rural_Industry-Farming</td>
-<td style="text-align: left;">1984:1984</td>
-<td style="text-align: left;">9999:9999</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">1218</td>
-<td style="text-align: left;">domus</td>
-<td style="text-align: left;">WM000019</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">9</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">English and Welsh Countryside</td>
-<td style="text-align: left;">3ar</td>
-<td style="text-align: left;">Older Farming Communities</td>
-<td style="text-align: left;">3a1r</td>
-<td style="text-align: left;">Countryside Living</td>
-<td style="text-align: left;">3r</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">mm.aim.0484</td>
-<td style="text-align: left;">Battle Of Flowers Museum</td>
-<td style="text-align: left;">La Robeline</td>
-<td style="text-align: left;">Mont des Corvees</td>
-<td style="text-align: left;">St Ouen</td>
-<td style="text-align: left;">JE3 2ES</td>
-<td style="text-align: right;">49.22077</td>
-<td style="text-align: right;">-2.107120</td>
-<td style="text-align: left;">/Channel Islands</td>
-<td style="text-align: left;">Unaccredited</td>
-<td style="text-align: left;">Independent-Private</td>
-<td style="text-align: left;">small</td>
-<td style="text-align: left;">aim_size_designation</td>
-<td style="text-align: left;">Arts-Crafts</td>
-<td style="text-align: left;">1971:1971</td>
-<td style="text-align: left;">2012:2012</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: left;">aim</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">mm.aim.0485</td>
-<td style="text-align: left;">Jet Age Museum</td>
-<td style="text-align: left;">57 Crown Drive</td>
-<td style="text-align: left;">Bishops Cleeve</td>
-<td style="text-align: left;">Cheltenham</td>
-<td style="text-align: left;">GL52 8TA</td>
-<td style="text-align: right;">51.94009</td>
-<td style="text-align: right;">-2.060766</td>
-<td style="text-align: left;">/England/South West (English Region)/Gloucestershire (English County)/Tewkesbury (English District or Borough)</td>
-<td style="text-align: left;">Accredited</td>
-<td style="text-align: left;">Independent-Not_for_profit</td>
-<td style="text-align: left;">medium</td>
-<td style="text-align: left;">aim_size_designation</td>
-<td style="text-align: left;">War_and_conflict-Airforce</td>
-<td style="text-align: left;">2013:2013</td>
-<td style="text-align: left;">9999:9999</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: left;">aim</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: left;">Country Living</td>
-<td style="text-align: left;">7ar</td>
-<td style="text-align: left;">Country Living</td>
-<td style="text-align: left;">7a1r</td>
-<td style="text-align: left;">Town and Country Living</td>
-<td style="text-align: left;">7r</td>
-<td style="text-align: left;">NA</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">mm.aim.0486</td>
-<td style="text-align: left;">Jewish Military Museum</td>
-<td style="text-align: left;">c/o Jewish Museum</td>
-<td style="text-align: left;">Raymond Burton House</td>
-<td style="text-align: left;">London</td>
-<td style="text-align: left;">NW1 7NB</td>
-<td style="text-align: right;">51.53716</td>
-<td style="text-align: right;">-0.144517</td>
-<td style="text-align: left;">/England/London (English Region)/Camden (London Borough)</td>
-<td style="text-align: left;">Unaccredited</td>
-<td style="text-align: left;">Independent-Not_for_profit</td>
-<td style="text-align: left;">small</td>
-<td style="text-align: left;">aim_size_designation</td>
-<td style="text-align: left;">War_and_conflict-Military</td>
-<td style="text-align: left;">1996:1996</td>
-<td style="text-align: left;">2015:2015</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: left;">aim</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: left;">London Cosmopolitan</td>
-<td style="text-align: left;">5ar</td>
-<td style="text-align: left;">London Cosmopolitan</td>
-<td style="text-align: left;">5a1r</td>
-<td style="text-align: left;">London Cosmopolitan</td>
-<td style="text-align: left;">5r</td>
-<td style="text-align: left;">NA</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p>Dedica diverses columnes a índexs de deprivació. Podem fer un retrat robot dels museus en cinc àrees segons índex de deprivació: molt baix, baix, mitjà, alt, molt alt.</p>
-<div class="cell">
-<details>
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Area_Deprivation_index)) <span class="sc">|&gt;</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">"deprivation_index_quantiles"</span> <span class="ot">=</span> <span class="fu">cut</span>(Area_Deprivation_index,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">10</span>),</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Molt alt"</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Alt"</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Mitjà"</span>,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Baix"</span>,</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"Molt baix"</span>))) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tt,</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> deprivation_index_quantiles)) <span class="sc">+</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">colour =</span> <span class="st">"black"</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="cn">NA</span>) <span class="sc">+</span> </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_family =</span> <span class="st">"Roboto condensed"</span>) <span class="sc">+</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Número de museus per àrea"</span>) <span class="sc">+</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>proportions <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">"titularitat"</span> <span class="ot">=</span> <span class="fu">str_extract</span>(Governance,<span class="st">".*(?=</span><span class="sc">\\</span><span class="st">-)"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deprivation_index_quantiles) <span class="sc">|&gt;</span> </span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>())</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">titularitat =</span> <span class="fu">str_extract</span>(Governance,<span class="st">".*(?=</span><span class="sc">\\</span><span class="st">-)"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(titularitat, deprivation_index_quantiles) <span class="sc">|&gt;</span> </span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_td =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(proportions, <span class="at">by =</span> <span class="st">"deprivation_index_quantiles"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n_td<span class="sc">/</span>n,</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">titularitat =</span> <span class="fu">case_when</span>(titularitat <span class="sc">==</span> <span class="st">"Independent"</span> <span class="sc">~</span> <span class="st">"Privada"</span>,</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                                 titularitat <span class="sc">==</span> <span class="st">"Government"</span> <span class="sc">~</span> <span class="st">"Pública"</span>,</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">is.na</span>(titularitat) <span class="sc">~</span> <span class="st">"Desconeguda"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> deprivation_index_quantiles,</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> prop,</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> titularitat)) <span class="sc">+</span> </span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>,</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span> </span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> modthemes<span class="sc">::</span>contrasting_palette) <span class="sc">+</span> </span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Titularitat dels museus per índex de deprivació"</span>) <span class="sc">+</span></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_family =</span> <span class="st">"Roboto condensed"</span>) <span class="sc">+</span> </span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> </span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">"mida_cat"</span> <span class="ot">=</span> <span class="fu">factor</span>(Size,</span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>                             <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"small"</span>, <span class="st">"medium"</span>, <span class="st">"large"</span>, <span class="st">"huge"</span>, <span class="st">"unknown"</span>),</span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>                             <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"petit"</span>, <span class="st">"mitjà"</span>, <span class="st">"gran"</span>, <span class="st">"molt gran"</span>, <span class="st">"NS"</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deprivation_index_quantiles, mida_cat) <span class="sc">|&gt;</span> </span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_dt =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(proportions, <span class="at">by =</span> <span class="st">"deprivation_index_quantiles"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n_dt<span class="sc">/</span>n) <span class="sc">|&gt;</span> </span>
-<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> deprivation_index_quantiles,</span>
-<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> prop,</span>
-<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> mida_cat)) <span class="sc">+</span> </span>
-<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>,</span>
-<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span> </span>
-<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> modthemes<span class="sc">::</span>contrasting_palette) <span class="sc">+</span> </span>
-<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Museus per mida i índex de deprivació"</span>) <span class="sc">+</span></span>
-<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_family =</span> <span class="st">"Roboto condensed"</span>) <span class="sc">+</span> </span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span> p3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<p><img src="20221123_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="1440"></p>
+<p><img src="20221123_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" alt="Three bar plots. One counts the number of museums grouped by area deprivation index. The second one counts them by area deprivation index and titularity and the third one by size and area deprivation index." width="1440"></p>
 </div>
 </div>
 <p>Les conclusions no són massa sorprenents. Les zones més deprimides tenen menys museus privats i petits, però també menys de molt grans. Seria interessant veure’n la qualitat però això serà un altre dia.</p>
