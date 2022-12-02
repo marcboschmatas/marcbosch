@@ -61,6 +61,8 @@ Fa temps que tinc ganes de posar-me amb l'anàlisi d'imatges aèries seriosament
 ## El districte veí més proper
 
 ![Basat en una idea de Topi Tjukanov](https://github.com/marcboschmatas/30DayMapChallenge2022/blob/main/plots/30_remix.png?raw=true)
+
+
 Ja per acabar, un remake d'un mapa que vaig fer força temps. Quin és el districte veí més proper de qualsevol punt de Barcelona? Dit d'una altra manera, caminant en línia recta, en quina direcció he d'anar per canviar de districte el més ràpid possible?
 
 
