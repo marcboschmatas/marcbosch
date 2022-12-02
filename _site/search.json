@@ -2,16 +2,16 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "About",
+    "title": "marcbosch",
     "section": "",
-    "text": "Aquí penjaré mapes, gràfics, idees que em passen pel cap. Moltes coses sobre ciutats."
+    "text": "Sóc politòleg una mica deformat cap a la geografia. M’agraden les ciutats, els mapes i les polítiques públiques. Era de lletres (crec que encara ho sóc en el fons) i he tirat cap als ordinadors."
   },
   {
     "objectID": "blog.html",
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "tidytuesday\n\n\nggplot\n\n\nmuseus\n\n\nR\n\n\n\n\n\n\n\n\n\n\n\nNov 23, 2022\n\n\nMarc Bosch\n\n\n\n\n\n\nNo matching items"
+    "text": "mapes\n\n\n30DayMapChallenge\n\n\nGIS\n\n\nR\n\n\n\n\n\n\n\n\n\n\n\nDec 2, 2022\n\n\nMarc Bosch\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\ntidytuesday\n\n\nggplot\n\n\nmuseus\n\n\nR\n\n\n\n\n\n\n\n\n\n\n\nNov 23, 2022\n\n\nMarc Bosch\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/post-with-code/index.html",
@@ -33,5 +33,54 @@
     "title": "Tidy Tuesdays 23/11/2022",
     "section": "",
     "text": "El Tidy Tuesday és una iniciativa on cada setmana es penja un conjunt de dades a Github i tothom en pot fer una visualització. Avui va de museus.\n\n\nShow the code\n# libraries\n#| output: false\nlibrary(tidyverse)\nlibrary(tidytuesdayR)\nlibrary(knitr)\nlibrary(patchwork)\nlibrary(modthemes)\n# get data\ntt <- tidytuesdayR::tt_load(last_tuesday())[[1]]\n\n\n\n    Downloading file 1 of 1: `museums.csv`\n\n\nLa base de dades recull tot d’informació sobre els museus del Regne Unit: on són, quina mida tenen, de què van… Dedica diverses columnes a índexs de deprivació. Podem fer un retrat robot dels museus en cinc àrees segons índex de deprivació: molt baix, baix, mitjà, alt, molt alt.\n\n\nShow the code\ntt <- tt |> \n  filter(!is.na(Area_Deprivation_index)) |> \n  mutate(\"deprivation_index_quantiles\" = cut(Area_Deprivation_index,\n                                         breaks = c(-1,2,4,6,8,10),\n                                         labels = c(\"Molt alt\",\n                                                    \"Alt\",\n                                                    \"Mitjà\",\n                                                    \"Baix\",\n                                                    \"Molt baix\"))) \n\n\n\n\nShow the code\np1 <- ggplot(tt,\n             aes(x = deprivation_index_quantiles)) + \n  geom_bar(colour = \"black\",\n           fill = NA) + \n  theme_classic(base_family = \"Roboto condensed\") +\n  labs(title = \"Número de museus per àrea\") +\n  theme(axis.title.x = element_blank(),\n        axis.title.y = element_blank())\nproportions <- tt |> \n  mutate(\"titularitat\" = str_extract(Governance,\".*(?=\\\\-)\")) |> \n  group_by(deprivation_index_quantiles) |> \n  summarise(n = n())\np2 <- tt |> \n  mutate(titularitat = str_extract(Governance,\".*(?=\\\\-)\")) |> \n  group_by(titularitat, deprivation_index_quantiles) |> \n  summarise(n_td = n()) |> \n  ungroup() |> \n  left_join(proportions, by = \"deprivation_index_quantiles\") |> \n  mutate(prop = n_td/n,\n         titularitat = case_when(titularitat == \"Independent\" ~ \"Privada\",\n                                 titularitat == \"Government\" ~ \"Pública\",\n                                 is.na(titularitat) ~ \"Desconeguda\")) |> \n  ggplot(aes(x = deprivation_index_quantiles,\n             y = prop,\n             fill = titularitat)) + \n  geom_bar(stat = \"identity\",\n           position = \"dodge\") +\n  scale_y_continuous(labels = scales::label_percent()) + \n  scale_fill_manual(values = modthemes::contrasting_palette) + \n  labs(title = \"Titularitat dels museus per índex de deprivació\") +\n  theme_classic(base_family = \"Roboto condensed\") + \n  theme(axis.title.x = element_blank(),\n        axis.title.y = element_blank())\n\n  \np3 <- tt |> \n  mutate(\"mida_cat\" = factor(Size,\n                             levels = c(\"small\", \"medium\", \"large\", \"huge\", \"unknown\"),\n                             labels = c(\"petit\", \"mitjà\", \"gran\", \"molt gran\", \"NS\"))) |> \n  group_by(deprivation_index_quantiles, mida_cat) |> \n  summarise(n_dt = n()) |> \n  ungroup() |> \n  left_join(proportions, by = \"deprivation_index_quantiles\") |> \n  mutate(prop = n_dt/n) |> \n  ggplot(aes(x = deprivation_index_quantiles,\n             y = prop,\n             fill = mida_cat)) + \n  geom_bar(stat = \"identity\",\n           position = \"dodge\") +\n  scale_y_continuous(labels = scales::label_percent()) + \n  scale_fill_manual(values = modthemes::contrasting_palette) + \n  labs(title = \"Museus per mida i índex de deprivació\") +\n  theme_classic(base_family = \"Roboto condensed\") + \n  theme(axis.title.x = element_blank(),\n        axis.title.y = element_blank())\np1 + p2 + p3\n\n\n\n\n\nLes conclusions no són massa sorprenents. Les zones més deprimides tenen menys museus privats i petits, però també menys de molt grans. Seria interessant veure’n la qualitat però això serà un altre dia."
+  },
+  {
+    "objectID": "posts/new/20221202.html",
+    "href": "posts/new/20221202.html",
+    "title": "#30DayMapChallenge: Conclusions",
+    "section": "",
+    "text": "Aquest novembre he fet un mapa cada dia seguint la proposta del geògraf finès Topi Tjukanov. La idea era fer una mica de divulgació de coses que passen a Catalunya i Barcelona que es poden explicar en un mapa: he parlat de transport, verd, accessibilitat… I també he aprofitat per a seguir aprenent R. Si voleu veure tots els mapes i el codi, els trobareu aquí.\nAquí només vull ensenyar els mapes que més m’ha agradat fer o compartir."
+  },
+  {
+    "objectID": "posts/new/20221202.html#viatges-dins-de-barcelona",
+    "href": "posts/new/20221202.html#viatges-dins-de-barcelona",
+    "title": "#30DayMapChallenge: Conclusions",
+    "section": "Viatges dins de Barcelona",
+    "text": "Viatges dins de Barcelona\n\n\n\nDesplaçaments diaris\n\n\nAquest mapa ensenya cap a on anem un dia laborable. Fent servir les dades de l’INE, mesuro quanta gent surt del seu barri un dia laborable d’octubre de 2021 per estar-se més de quatre hores fora i cap on van. De cada barri surten tres línies cap als tres barris on més gent va i el color del barri representa quantes vegades surt al top-3 de destinacions de cada barri. Veiem per exemple que la Marina del Port té vuit fletxes, per tant, és al top tres de destinacions preferides al menys 8 vegades. Altres barris on va molta gent són la dreta de l’Eixample, La Bonanova i Montbau. En canvi, de l’extrem de Nou Barris, alguns barris de muntanya de Gràcia o Horta o de la Bordeta, Badal i Mercat Nou, la gent només en surt."
+  },
+  {
+    "objectID": "posts/new/20221202.html#risc-dincendi-forestal",
+    "href": "posts/new/20221202.html#risc-dincendi-forestal",
+    "title": "#30DayMapChallenge: Conclusions",
+    "section": "Risc d’incendi forestal",
+    "text": "Risc d’incendi forestal\n\n\n\nFreqüencies de risc alt\n\n\nAquest mapa no té cap secret, fa un recompte de quantes vegades cada comarca ha estat en risc alt o molt alt d’incendi forestal entre el 2000 i ara. M’agrada per això perquè les dades les vaig tenir gràcies a una petició de transparència que em van respondre els Agents Rurals molt ràpidament."
+  },
+  {
+    "objectID": "posts/new/20221202.html#mercats-municipals",
+    "href": "posts/new/20221202.html#mercats-municipals",
+    "title": "#30DayMapChallenge: Conclusions",
+    "section": "Mercats municipals",
+    "text": "Mercats municipals\n\n\n\nAccessibilitat als mercats\n\n\nLes distàncies a peu i el component espaial de l’equitat són un dels meus temes preferits. Veure qui i qui no té accés a les coses és una cosa que cal repetir molt sovint. Per això un mapa de mercats municipals on, afortunadament, estem prou bé. D’altra banda, m’agrada perquè va ser el primer mapa que vaig fer amb la paleta de colors inspirada en els mapes i gràfics de WEB DuBois."
+  },
+  {
+    "objectID": "posts/new/20221202.html#freqüència-de-pas-per-parades-de-metro-i-autobús",
+    "href": "posts/new/20221202.html#freqüència-de-pas-per-parades-de-metro-i-autobús",
+    "title": "#30DayMapChallenge: Conclusions",
+    "section": "Freqüència de pas per parades de metro i autobús",
+    "text": "Freqüència de pas per parades de metro i autobús\n\n\n\nFreqüències de pas\n\n\nLes animacions sempre són divertides. Es veu força clar quines línies de metro tenen més freqüència de pas que les altres."
+  },
+  {
+    "objectID": "posts/new/20221202.html#prediccions-dús-del-sòl-a-les-illes-medes",
+    "href": "posts/new/20221202.html#prediccions-dús-del-sòl-a-les-illes-medes",
+    "title": "#30DayMapChallenge: Conclusions",
+    "section": "Prediccions d’ús del sòl a les Illes Medes",
+    "text": "Prediccions d’ús del sòl a les Illes Medes\n\n\n\nUna mica d’aprenentatge automàtic\n\n\nFa temps que tinc ganes de posar-me amb l’anàlisi d’imatges aèries seriosament. Quan no hi ha dades dispoonibles, és una bona manera de veure on són les coses. Per això un petit experiment d’aprenentatge no supervisat amb imatges aèries de les Illes Medes. Li vaig demanar que m’agrupés tots els píxels en tres categories segons la combinació de verd, blau, vermell i infraroig proper i em va fer un mapa força realista!"
+  },
+  {
+    "objectID": "posts/new/20221202.html#el-districte-veí-més-proper",
+    "href": "posts/new/20221202.html#el-districte-veí-més-proper",
+    "title": "#30DayMapChallenge: Conclusions",
+    "section": "El districte veí més proper",
+    "text": "El districte veí més proper\n Ja per acabar, un remake d’un mapa que vaig fer força temps. Quin és el districte veí més proper de qualsevol punt de Barcelona? Dit d’una altra manera, caminant en línia recta, en quina direcció he d’anar per canviar de districte el més ràpid possible?"
   }
 ]

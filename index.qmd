@@ -4,6 +4,9 @@ image: imageofthecity.jpeg
 about:
   template: jolla
   links:
+    - icon: book
+      text: Blog
+      href: https://marcbosch.netlify.app/blog.html
     - icon: twitter
       text: Twitter
       href: https://twitter.com/Mboschm
@@ -13,7 +16,11 @@ about:
     - icon: github
       text: Github
       href: https://github.com/marcboschmatas/
+    - icon: linkedin
+      text: Linkedin
+      href: https://www.linkedin.com/in/marc-bosch-matas-8805a880/
+
 
 ---
 
-Aquí penjaré mapes, gràfics, idees que em passen pel cap. Moltes coses sobre ciutats.
+Sóc politòleg una mica deformat cap a la geografia. M'agraden les ciutats, els mapes i les polítiques públiques. Era de lletres (crec que encara ho sóc en el fons) i he tirat cap als ordinadors.
