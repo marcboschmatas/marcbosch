@@ -1,12 +1,9 @@
 ---
-title: "About"
+title: "Marc Bosch i Matas"
 image: imageofthecity.jpeg
 about:
   template: jolla
   links:
-    - icon: book
-      text: Blog
-      href: https://marcbosch.netlify.app/blog.html
     - icon: twitter
       text: Twitter
       href: https://twitter.com/Mboschm
@@ -16,10 +13,6 @@ about:
     - icon: github
       text: Github
       href: https://github.com/marcboschmatas/
-    - icon: linkedin
-      text: Linkedin
-      href: https://www.linkedin.com/in/marc-bosch-matas-8805a880/
-
 
 ---
 
