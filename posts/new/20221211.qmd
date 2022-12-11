@@ -1,7 +1,7 @@
 ---
 title: "Reutilitzant dades públiques: escoles a OpenStreetMap"
 author: "Marc Bosch Matas"
-date: "2022-11-23"
+date: "2022-12-11"
 categories: [OpenStreetMap, OpenData, Dades Obertes, R]
 execute:
   warning: false
