@@ -11,7 +11,6 @@ format:
   html: 
     code-fold: true
     code-summary: "Codi R"
-draft: true
 ---
 
 Avui comparteixo una de les coses que faig quan la vida em deixa: editar OpenStreetMap. Si coneixeu aquest projecte, consisteix en una gran base de dades geolocalitzada que editem persones de tot arreu utilitzant fonts de coneixement lliures. Bàsicament ho faig per activisme: OpenStreetMap pot ser una alternativa a Google Maps i altres projectes que donen beneficis a les grans tecnològiques. No corre el risc que ho compri l'Elon Musk de torn ni de patir censures arbitràries. Més important, qualsevol persona el pot editar, i el criteri de què és important el marquem les persones que hi participem. D'altra banda, els editors i editores catalans som una colla de gent bastant simpàtica i ens toca més l'aire que si editéssim la Viquipèdia. D'altra banda, també fem molta cosa amb ordinadors per tenir el màxim de dades possibles amb el mínim esforç.
