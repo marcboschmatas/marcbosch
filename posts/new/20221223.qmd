@@ -145,8 +145,7 @@ ggplot(lloguer_total_long, aes(x = trimestre, y = lloguer)) +
             nudge_x = -300, size = 3.5) + 
   geom_text(data = ends, mapping = aes(label = round(lloguer,0)), 
             nudge_x = 300, size = 3.5) + 
-    scale_y_continuous(expand = c(1, 0),
-                       limits = c(200,3000)) +
+    scale_y_continuous(expand = c(1, 0)) +
   facet_grid(barri ~ ., scales = "free_y") +
   ggthemes::theme_tufte(base_family = "Montserrat") + 
   theme(axis.title=element_blank(), 
