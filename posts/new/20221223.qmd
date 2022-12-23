@@ -1,0 +1,219 @@
+---
+title: "Lloguers i renda per barris"
+author: "Marc Bosch Matas"
+date: "2022-12-23"
+categories: [OpenStreetMap, OpenData, Dades Obertes, R]
+execute:
+  warning: false
+  error: false
+  message: false
+format:
+  html: 
+    code-fold: true
+    code-summary: "Codi R"
+---
+
+Fa no massa dies, el diari Nació Digital publicava una [notícia amb les noves dades de lloguers als municipis de Catalunya i els barris de Barcelona](https://www.naciodigital.cat/noticia/250583/lloguer-municipis-barris-barcelona-encarit-euros-any) amb el creixement desmesurat que ha tingut en els darrers mesos. Amb això, m'han agafat ganes de mirar-ho amb una mica més de perspectiva, en concret: **quina evolució han tingut als barris de Barcelona els darrers anys? Quin impacte tenen els lloguers com a percentatge de la renda mitjana del barri?** Vegem-ho amb les dades que publica l'Agència de l'Habitatge de Catalunya.
+
+
+```{r}
+#| output: false
+#| label: libraries and data
+library(tidyverse)
+library(readxl)
+library(ggthemes)
+library(patchwork)
+path <- "/home/marc/Documents/trimestral_bcn_lloguer.xlsx"
+lloguer_2022 <- read_xlsx(path = path,
+                          sheet = "2022",
+                          range = "B22:E94",
+                          na = "nd",
+                          col_names = c("barri", "2022/01/01","2022/04/01",
+                                        "2022/07/01"))
+lloguer_2021 <- read_xlsx(path = path,
+                          sheet = "2021",
+                          range = "B22:F94",
+                          na = c("nd","0"),
+                          col_names = c("barri", "2021/01/01",
+                                        "2021/04/01", "2021/07/01", 
+                                        "2021/10/01"))
+
+lloguer_2020 <- read_xlsx(path = path,
+                          sheet = "2020",
+                          range = "B22:F94",
+                          na = c("nd","0"),
+                          col_names = c("barri", "2020/01/01",
+                                        "2020/04/01", "2020/07/01", 
+                                        "2020/10/01"))
+lloguer_2019 <- read_xlsx(path = path,
+                          sheet = "2019",
+                          range = "B22:F94",
+                          na = c("nd","0", ""),
+                          col_names = c("barri", "2019/01/01",
+                                        "2019/04/01", "2019/07/01", 
+                                        "2019/10/01"))
+lloguer_2018 <- read_xlsx(path = path,
+                          sheet = "2018",
+                          range = "B22:F94",
+                          na = c("nd","0", ""),
+                          col_names = c("barri", "2018/01/01",
+                                        "2018/04/01", "2018/07/01", 
+                                        "2018/10/01"))
+lloguer_2017 <- read_xlsx(path = path,
+                          sheet = "2017",
+                          range = "B22:F94",
+                          na = c("nd","0", ""),
+                          col_names = c("barri", "2017/01/01",
+                                        "2017/04/01", "2017/07/01", 
+                                        "2017/10/01"))
+
+lloguer_2016 <- read_xlsx(path = path,
+                          sheet = "2016",
+                          range = "B22:F94",
+                          na = c("nd","0", "", "n.d."),
+                          col_names = c("barri", "2016/01/01",
+                                        "2016/04/01", "2016/07/01", 
+                                        "2016/10/01"))
+lloguer_2015 <- read_xlsx(path = path,
+                          sheet = "2015",
+                          range = "B21:F93",
+                          na = c("nd","0", "", "n.d."),
+                          col_names = c("barri", "2015/01/01",
+                                        "2015/04/01", "2015/07/01", 
+                                        "2015/10/01"))
+lloguer_2014 <- read_xlsx(path = path,
+                          sheet = "2014",
+                          range = "B21:F93",
+                          na = c("nd","0", "", "n.d."),
+                          col_names = c("barri", "2014/01/01",
+                                        "2014/04/01", "2014/07/01", 
+                                        "2014/10/01"))
+
+renda_barris <- read_csv("https://opendata-ajuntament.barcelona.cat/data/dataset/c9b9b5e5-b02f-4b47-892b-79acf0191802/resource/0d9df8cf-8b95-43c3-b07d-14e11f2ebdaf/download/2019_renda_neta_mitjana_per_llar.csv")
+```
+
+
+
+Primer de tot, com s'ha comportat el lloguer mitjà a cada barri des del principi de 2014 fins a finals de setembre de 2022?
+
+```{r}
+#| label: sparklines lloguer
+#| fig-cap: "Evolució del lloguer per barris 2014-2022. S'han eliminat els barris amb  valors perduts."
+#| fig-height: 15
+lloguer_total <- lloguer_2014 |>  
+  left_join(lloguer_2015, by = "barri") |> 
+  left_join(lloguer_2016, by = "barri") |> 
+  left_join(lloguer_2017, by = "barri") |> 
+  left_join(lloguer_2018, by = "barri") |> 
+  left_join(lloguer_2019, by = "barri") |> 
+  left_join(lloguer_2020, by = "barri") |> 
+  left_join(lloguer_2021, by = "barri") |> 
+  left_join(lloguer_2022, by = "barri")
+lloguer_total$count_na <- rowSums(is.na(lloguer_total))
+
+difs <- lloguer_total |>
+  filter(count_na == 0) |> 
+  rowwise() |> 
+  mutate(dif = `2022/01/01`-`2014/01/01`) |> 
+  select(barri, dif)
+# eliminate sections w too many na
+
+lloguer_total_long <- lloguer_total |>  
+  filter(count_na == 0) |> 
+  select(-count_na) |> 
+  pivot_longer(-barri, names_to = "trimestre", values_to = "lloguer") |> 
+  mutate(trimestre = as.Date(trimestre)) |> 
+  left_join(difs, by = "barri") |> 
+  mutate(barri = factor(barri),
+         barri = fct_reorder(barri,dif))
+
+begs <- lloguer_total_long |> 
+  group_by(barri) |> 
+  filter(trimestre == "2014/01/01")
+
+ends <- lloguer_total_long |> 
+  group_by(barri) |> 
+  filter(trimestre == "2022/07/01")
+
+ggplot(lloguer_total_long, aes(x = trimestre, y = lloguer)) + 
+  geom_line() + 
+  geom_point(data = begs,
+             colour = modthemes::dubois_green) + 
+  geom_point(data = ends,
+             colour = modthemes::dubois_red) + 
+  geom_text(data = begs, mapping = aes(label = round(lloguer,0)), 
+            nudge_x = -300, size = 3.5) + 
+  geom_text(data = ends, mapping = aes(label = round(lloguer,0)), 
+            nudge_x = 300, size = 3.5) + 
+    scale_y_continuous(expand = c(1, 0),
+                       limits = c(200,3000)) +
+  facet_grid(barri ~ ., scales = "free_y") +
+  ggthemes::theme_tufte(base_family = "Montserrat") + 
+  theme(axis.title=element_blank(), 
+        axis.text.y = element_blank(),
+        strip.text.y = element_text(angle = 0), # etiquetes horitzontals
+        text = element_text(family = "Montserrat"),
+        axis.ticks.y = element_blank()) 
+```
+
+
+Veiem que no hi ha cap barri que es salvi de pujades importants, tot i que no tots ho han fet al mateix ritme. Vegem-ho ara en relació de la renda mitjana per llar de cada barri: quin percentatge de la renda mitjana suposa el lloguer mitjà? I quin percentatge suposa l'increment en euros del lloguer entre el tercer trimestre de 2021 i la mateixa data de 2022?
+
+
+```{r}
+#| label: rents and income
+#| fig-cap: "Lloguer mitjà per barri al tercer trimestre de 2022 en relació a la renda mitjana del barri. La renda del barri es calcula com la mitjana entre les rendes de cada secció censal i correspon al darrer valor disponible al portal de dades de l'Ajuntament de Barcelona (2019)"
+#| fig-height: 15
+
+renda_barris_group <- renda_barris |> 
+  mutate(Nom_Barri = case_when(Nom_Barri == "el Gòtic" ~ "el Barri Gòtic",
+                               Nom_Barri == "el Poble Sec" ~ "el Poble Sec - AEI Parc Montjuïc",
+                               Nom_Barri == "la Marina del Prat Vermell" ~ "la Marina del Prat Vermell - AEI Zona Franca",
+                               Nom_Barri == "el Putget i Farró" ~ "el Putxet i el Farró",
+                               Nom_Barri == "Vila de Gràcia" ~ "la Vila de Gràcia",
+                               Nom_Barri == "Camp de l'Arpa del Clot" ~ "el Camp de l'Arpa del Clot",
+                               TRUE ~ Nom_Barri)) |> 
+  group_by(Nom_Barri) |> 
+  summarise(renda = mean(Import_Euros, na.rm = TRUE))
+lloguer_2221 <- lloguer_total |> 
+  select(barri, "2022/07/01", "2021/07/01") |> 
+  rowwise() |> 
+  mutate(dif = `2022/07/01`-`2021/07/01`) |> 
+  select(-`2021/07/01`) |> 
+  left_join(renda_barris_group, by = c("barri" = "Nom_Barri")) |> 
+  mutate("lloguer" = `2022/07/01`/renda,
+         "creixement" = dif/renda) |> 
+  select(barri, lloguer, creixement) |> 
+  filter(!is.na(creixement))
+
+
+ggplot(lloguer_2221, aes(y = reorder(barri, lloguer), x = lloguer)) + 
+  geom_bar(stat = "identity",
+           fill = "white",
+           colour = "black") + 
+  geom_text(aes(label = round(lloguer,2)), nudge_y = 0.02) + 
+  ggthemes::theme_tufte(base_family = "Montserrat") + 
+  theme(axis.title = element_blank(),
+        text = element_text(family = "Montserrat"))
+
+```
+
+
+```{r}
+#| label: rent growth by income
+#| fig-cap: "Increment del lloguer mitjà per barri entre el tercer trimestre de 2021 i la mateixa data de 2022 en relació a la renda mitjana del barri. La renda del barri es calcula com la mitjana entre les rendes de cada secció censal i correspon al darrer valor disponible al portal de dades de l'Ajuntament de Barcelona (2019)"
+#| fig-height: 15
+
+
+ggplot(lloguer_2221, aes(y = reorder(barri, creixement), x = creixement)) + 
+  geom_bar(stat = "identity",
+           fill = "white",
+           colour = "black") + 
+    geom_text(aes(label = round(creixement,4)), nudge_y = 0.002) +
+  ggthemes::theme_tufte(base_family = "Montserrat") + 
+  theme(axis.title = element_blank())
+
+```
+
+Cap sorpresa. El lloguer suposa un percentatge més elevat de la renda per llar a Ciutat Vella (pressió turística), algunes zones del POblenou, Sants-Montjuic, Gràcia i Eixample.
+Pel que fa a l'increment del lloguer, no veiem un patró clar, malgrat que els increments han estat menors respecte a la renda per llar en zones de rendes baixes (amb excepcions com Pedralbes) i a les zones on suposen increments més elevats, veiem llocs tant diferents com Sant Martí de Provençals, la Bordeta o Vallvidrera, el Tibidabo i Les Planes.
