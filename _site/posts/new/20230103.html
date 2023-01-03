@@ -496,6 +496,59 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
+<p>Finalment, també podem crear un objecte per dibuixar els rangs interquartils.</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>InterquartileRange <span class="ot">&lt;-</span> <span class="fu">ggproto</span>(<span class="st">"InterquartileRange"</span>, Stat,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">required_aes =</span> <span class="fu">c</span>(<span class="st">"group"</span>),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">compute_group =</span> <span class="cf">function</span>(data, scales, <span class="at">fill =</span> <span class="st">"gray90"</span>){</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                                grid <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span> </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">group_by</span>(group) <span class="sc">|&gt;</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">summarise</span>(<span class="at">ymin =</span> <span class="fu">quantile</span>(y, <span class="fl">0.25</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                                            <span class="at">ymax =</span> <span class="fu">quantile</span>(y, <span class="fl">0.75</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">right_join</span>(data) <span class="sc">|&gt;</span> </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">mutate</span>(<span class="st">"fill"</span> <span class="ot">=</span> fill)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>                                grid</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                              }</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>                                )</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>stat_interquartilerange <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">mapping =</span> <span class="cn">NULL</span>, <span class="at">data =</span> <span class="cn">NULL</span>, <span class="at">geom =</span> <span class="st">"ribbon"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>                             <span class="at">position =</span> <span class="st">"identity"</span>, <span class="at">show.legend =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>                             <span class="at">inherit.aes =</span> <span class="cn">TRUE</span>, <span class="at">fill =</span> <span class="st">"gray90"</span>){</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layer</span>(<span class="at">stat =</span> InterquartileRange, <span class="at">data =</span> data, <span class="at">mapping =</span> mapping, <span class="at">geom =</span> geom,</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">position =</span> position, <span class="at">show.legend =</span> show.legend, <span class="at">inherit.aes =</span> inherit.aes,</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">params =</span> <span class="fu">list</span>(<span class="at">fill =</span> fill))</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell page-columns page-full">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(groups, <span class="fu">aes</span>(<span class="at">x =</span> any, <span class="at">y =</span> renda)) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_interquartilerange</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="st">"districte"</span>), <span class="at">fill =</span> <span class="st">"gray90"</span>) <span class="sc">+</span> <span class="co"># rang quartils</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_sparklabels</span>(<span class="fu">aes</span>(<span class="at">group =</span> districte)) <span class="sc">+</span> </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2008</span>, <span class="dv">2016</span>, <span class="dv">2</span>)) <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_tufte</span>(<span class="at">base_family =</span> <span class="st">"Montserrat"</span>, <span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title=</span><span class="fu">element_blank</span>(), </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(), </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">strip.text.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">size =</span> <span class="dv">16</span>), <span class="co"># això fa que les etiquetes surtin en horitzontal - important</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"Montserrat"</span>)) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(districte <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p><img src="20230103_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" alt="Evolució de l'Índex de renda per districtes. Ajuntament de Barcelona. Punts obtinguts amb l'objecte SparkLabels utilitzant el paràmetre ```geom = 'point'```" width="1440"></p>
+<p></p><figcaption class="figure-caption margin-caption">Evolució de l’Índex de renda per districtes. Ajuntament de Barcelona. Punts obtinguts amb l’objecte SparkLabels utilitzant el paràmetre <code>geom = 'point'</code>. Rang interquartil creat amb l’objecte InterquartileRange</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>I ja ho tenim. Dos stats que ens permeten generar elements com un rang interquartil o etiquetes pels valors més interessants sense necessitat de crear noves taules ni més línies de codi del compte. De tot això en faré un paquet un cop controli que funciona bé amb altres dades per no haver de repetir les funcions cada vegada.</p>
 
 
 
