@@ -235,3 +235,51 @@ ggplot(groups, aes(x = any, y = renda)) +
         text = element_text(family = "Montserrat")) +
   facet_grid(districte ~ ., scales = "free_y")
 ```
+
+
+Finalment, també podem crear un objecte per dibuixar els rangs interquartils.
+
+```{r}
+InterquartileRange <- ggproto("InterquartileRange", Stat,
+                              required_aes = c("group"),
+                              compute_group = function(data, scales, fill = "gray90"){
+                                grid <- data |> 
+                                  group_by(group) |> 
+                                  summarise(ymin = quantile(y, 0.25),
+                                            ymax = quantile(y, 0.75)) |> 
+                                  right_join(data) |> 
+                                  mutate("fill" = fill)
+                                grid
+                              }
+                                )
+
+stat_interquartilerange <- function(mapping = NULL, data = NULL, geom = "ribbon",
+                             position = "identity", show.legend = TRUE,
+                             inherit.aes = TRUE, fill = "gray90"){
+  layer(stat = InterquartileRange, data = data, mapping = mapping, geom = geom,
+        position = position, show.legend = show.legend, inherit.aes = inherit.aes,
+        params = list(fill = fill))
+}
+```
+
+```{r}
+#| fig-cap: Evolució de l'Índex de renda per districtes. Ajuntament de Barcelona. Punts obtinguts amb l'objecte SparkLabels utilitzant el paràmetre ```geom = 'point'```. Rang interquartil creat amb l'objecte InterquartileRange
+#| fig-alt: Evolució de l'Índex de renda per districtes. Ajuntament de Barcelona. Punts obtinguts amb l'objecte SparkLabels utilitzant el paràmetre ```geom = 'point'```
+#| cap-location: margin
+#| fig-height: 10
+ggplot(groups, aes(x = any, y = renda)) +
+  stat_interquartilerange(aes(group = "districte"), fill = "gray90") + # rang quartils
+  geom_line() +
+  stat_sparklabels(aes(group = districte)) + 
+  scale_x_continuous(breaks = seq(2008, 2016, 2)) +
+  scale_y_continuous(expand = c(0.2, 0)) + 
+  theme_tufte(base_family = "Montserrat", base_size = 16) +
+  theme(axis.title=element_blank(), 
+        axis.text.y = element_blank(), 
+        axis.ticks = element_blank(),
+        strip.text.y = element_text(angle = 0, size = 16), # això fa que les etiquetes surtin en horitzontal - important
+        text = element_text(family = "Montserrat")) +
+  facet_grid(districte ~ ., scales = "free_y")
+```
+
+I ja ho tenim. Dos stats que ens permeten generar elements com un rang interquartil o etiquetes pels valors més interessants sense necessitat de crear noves taules ni més línies de codi del compte. De tot això en faré un paquet un cop controli que funciona bé amb altres dades per no haver de repetir les funcions cada vegada.
