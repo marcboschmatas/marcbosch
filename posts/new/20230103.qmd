@@ -1,7 +1,7 @@
 ---
 title: "#TidyTuesday Creant un objecte ggplot"
 author: "Marc Bosch"
-date: "2022-12-02"
+date: "2023-01-03"
 categories: [R, ggplot2, tidyverse, TidyTuesday]
 execute:
   warning: false
