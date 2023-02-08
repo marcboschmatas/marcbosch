@@ -15,6 +15,7 @@ website:
 format:
   html:
     theme: journal
+    mainfont: "Alte Haas Grotesk"
     css: styles.css
 
 
