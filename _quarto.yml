@@ -14,7 +14,7 @@ website:
         href: https://mapstodon.space/@marcbosch
 format:
   html:
-    theme: journal_custom.scss
+    theme: journal
     css: styles.css
 
 
