@@ -14,8 +14,7 @@ website:
         href: https://mapstodon.space/@marcbosch
 format:
   html:
-    theme: journal
-    mainfont: "Alte Haas Grotesk"
+    theme: journal_custom.scss
     css: styles.css
 
 
