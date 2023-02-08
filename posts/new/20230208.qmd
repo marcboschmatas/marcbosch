@@ -1,0 +1,90 @@
+---
+title: "Conques hidrogràfiques de Catalunya"
+author: "Marc Bosch"
+date: "2023-02-08"
+categories: [R, openstreetmap, tmap]
+execute:
+  warning: false
+  error: false
+  message: false
+format:
+  html: 
+    code-fold: true
+    code-summary: "Show the code"
+    fig-width: 15
+image: rius_estatic.png
+---
+
+
+
+```{r}
+library(tidyverse)
+library(tmap)
+library(sf)
+library(igraph)
+tmap::tmap_mode("plot")
+```
+
+Fa no massa vaig veure un mapa d'Europa amb totes les seves conques fluvials. Avui intentarem fer el mateix amb R utilitzant dades d'OpenStreetMap. Primer, llegim les dades de rius, rieres i torrents.
+
+
+
+```{r}
+#| output: false
+rius <- st_read("/home/marc/Documents/30dayMapChallenge/data/cataluna-latest.osm.pbf",
+                query = "select * from lines where waterway in ('river','stream')")
+bm <- tmaptools::read_osm(rius)
+```
+
+```{r}
+#| fig-cap: Rius, rieres i rierols de Catalunya. Una mica caòtic, no?\nFont Col·laboradors d'OpenStreetMap
+#| cap-location: margin
+#| fig-height: 10
+#| fig-width: 10
+tm_shape(bm) + 
+  tm_rgb(alpha = 0.2) + 
+  tm_shape(rius) + 
+  tm_lines(col = "blue") + 
+  tm_layout(frame = F)
+```
+
+
+
+```{r}
+knitr::kable(head(select(rius, name, waterway, `_ogr_geometry_`)), style = "pipe")
+```
+
+Per a crear un mapa de conques hidrogràfiques, cal que ajuntem tots els rius que es toquen entre sí. Tocarà jugar una mica amb xarxes. També ho haurem de filtrar per tenir només les que fan més de 100 km de llargada, perquè el mapa sigui llegible.
+
+```{r}
+my_idx_touches <- st_touches(rius) # determinar quins segments es toquen entre sí
+xarxa_rius <- graph_from_adj_list(my_idx_touches) # crear una xarxa
+ids <- components(xarxa_rius)$membership # crear un vector amb el grup al qual pertany cada segment de riu
+rius_agrupat <- rius |> 
+  group_by(conca = as.character({{ids}})) |>  
+  summarise()
+
+rius_filtrat <- rius_agrupat |> 
+  filter(as.numeric(st_length(`_ogr_geometry_`)) >= 100000) # filtrar per conques de menys de 100 km
+```
+
+
+```{r}
+#| fig-cap: Les 14 principals conques hidrogràfiques de Catalunya\nFont Col·laboradors d'OpenStreetMap
+#| cap-location: margin
+#| fig-height: 10
+#| fig-width: 10
+map <- tm_shape(bm) + 
+  tm_rgb(alpha = 0.2) + 
+  tm_shape(rius_filtrat) + 
+  tm_lines(col = "conca",
+           palette = "viridis",
+           legend.col.show = FALSE) + 
+  tm_layout(frame = FALSE)
+map
+```
+
+
+
+
+
