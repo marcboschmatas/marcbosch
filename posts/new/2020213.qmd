@@ -1,0 +1,93 @@
+---
+title: "Evolució de la temperatura a l'observatori Fabra 2009-2023"
+author: "Marc Bosch"
+date: "2023-02-08"
+categories: [R, ggplot2, clima, tufte]
+execute:
+  warning: false
+  error: false
+  message: false
+format:
+  html: 
+    code-fold: true
+    code-summary: "Show the code"
+    fig-width: 15
+---
+
+El meteocat ofereix en obert les dades de tots els observatoris meteorològics de Catalunya d'entre 2009 i avui, actualitzades en directe. Avui aprofito per presentar l'evolució de la temperatura de cada mes entre 2009 i 2022 a l'Observatori Fabra. De pas, aprofito per compartir una manera diferent de presentar els gràfics de caixa i bigotis segons les idees de l'estadístic i politòleg Edward Tufte. Però anem a pams, primer, baixem les dades del portal de la Generalitat i mirem quina pinta fan.
+
+```{r}
+#| output: false
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(ggthemes)
+library(palmerpenguins)
+```
+
+
+
+```{r}
+
+temps <- GET("https://analisi.transparenciacatalunya.cat/resource/nzvn-apee.json?codi_variable=32&codi_estacio=D5&$limit=1000000") |> 
+  content(as = "text") |> 
+  fromJSON()
+knitr::kable(head(temps[,2:5]))
+```
+
+Veiem el codi de l'estació (Observatori Fabra), el codi de la variable (temperatura), la data i l'hora en què s'ha pres la mesura (un cop cada mitja hora) i el valor (és a dir, la temperatura registrada).
+
+
+I un cop les tenim, fem el gràfic. Per representar la informació he triat fer un gràfic de caixa i bigotis, que ens indica on són el mínim, el primer quartil, la mediana, el tercer quartil i el màxim. Els valors extrems (és a dir, molt més allunyats dels mínims i màxims), els representa com a punts per a mostrar que estan molt allunyats de la distribució més habitual dels gràfics. Normalment estem acostumats a que facin una pinta així.
+
+```{r}
+#| fig-cap: Les dades fan referència als animals preferits dels programadors d'R, els pingüins.
+#| fig-width: 5
+theme_set(ggthemes::theme_tufte(base_family = "Roboto condensed")) # triem el tema del gràfic
+ggplot(penguins, aes(x = species, group = species, y = bill_length_mm)) + 
+  geom_boxplot() + 
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+```
+
+Però la veritat, jo el trobo poc estètic, i m'agrada més la reinterpretació que en fa Edward Tufte. Igual que en el model tradicional, trobem una línia que representa la distància entre el mínim i el primer quartil i el màxim i el tercer quartil respectivament, però la caixa queda substituida per un espai en blanc i la mediana per un punt. Molt més elegant i igual d'informatiu, si m'ho pregunteu.
+
+```{r}
+#| fig-width: 5
+ggplot(penguins, aes(x = species, group = species, y = bill_length_mm)) + 
+  geom_tufteboxplot(stat = "boxplot") + 
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+```
+
+```{r}
+#| fig-cap: Evolució de la temperatura per mesos 2009-2022. El punt negre indica la mediana, la x vermella la mitjana, i la línia blava la tendència entre 2009 i 2022.
+#| fig-height: 9
+#| fig-width: 9
+p <- temps |> 
+  as_tibble() |> 
+  mutate(valor_lectura = as.numeric(valor_lectura),
+         data_lectura = lubridate::as_datetime(data_lectura)) |> 
+  mutate(mes = lubridate::month(data_lectura, label = TRUE, locale = Sys.getlocale("LC_TIME")),
+         any = (lubridate::year(data_lectura)),
+         mes = str_remove(mes, "de "),
+         mes = str_remove(mes, "d’"),
+         mes = factor(mes, levels = c("gen", "febr", "març", "abr", "maig", "juny",
+                                      "jul", "ag", "set", "oct", "nov", "des"))) |> 
+  filter(any < 2023) |> 
+  ggplot(aes(x = any, y = valor_lectura)) +
+  geom_smooth(method = "lm",
+              lwd = 0.5,
+              se = FALSE) + 
+  ggthemes::geom_tufteboxplot(aes(group = any), stat = "boxplot", outlier.size = 0.25) + 
+  stat_summary(fun = mean, fun.args = list(na.rm = TRUE), aes(group = any), 
+               geom = "point", shape = 4, colour = "red") + 
+  facet_wrap(~mes,
+             scales = "free_x") + 
+  ggthemes::theme_tufte(base_family = "Roboto Condensed") + 
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+p
+```
+
+Veiem que els febrers i els desembres són els mesos que més s'han escalfat entre 2009 i 2022, seguits de prop de maigs, junys, juliols i, un pèl menys, setembres. La primavera i la tardor s'avancen cada cop més, com ja sabem de sobres.
