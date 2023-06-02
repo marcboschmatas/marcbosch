@@ -1,7 +1,7 @@
 ---
 title: "Municipals 2023 a Barcelona: on es vota més semblant a la ciutat?"
 author: "Marc Bosch"
-date: "2023-02-06"
+date: "2023-06-02"
 categories: [R, ggplot2, tmap, sf, eleccions]
 execute:
   warning: false
