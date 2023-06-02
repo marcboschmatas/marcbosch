@@ -1,0 +1,212 @@
+---
+title: "Municipals 2023 a Barcelona: on es vota més semblant a la ciutat?"
+author: "Marc Bosch"
+date: "2023-02-06"
+categories: [R, ggplot2, tmap, sf, eleccions]
+execute:
+  warning: false
+  error: false
+  message: false
+format:
+  html: 
+    code-fold: true
+    code-summary: "Show the code"
+    fig-width: 15
+---
+
+
+Diumenge passat van ser eleccions: més enllà de si estem contents o no dels resultats, em feia una pregunta: on voten més semblant al resultat global de la ciutat?
+Aquí mirarem quins districtes, barris i seccions censals s'assemblen més al resultat final de la ciutat tenint en compte només els vots a partits amb més d'un 3% de vot i vots en blanc.
+### Com vam votar?
+
+Per gent despistada, recordem els resultats a nivell de ciutat.
+
+
+```{r}
+library(tidyverse)
+library(sf)
+library(tmap)
+library(modthemes)
+
+restot <- read.csv("https://opendata-ajuntament.barcelona.cat/data/dataset/78d2734c-35ee-49de-86c6-4bafef2e8e05/resource/ece25812-297e-49c9-8907-526797731fc8/download/2023_eleccions_locals.csv")
+unitats <- st_read("/home/marc/sessio_mapes_3/data/BCN_UNITATS_ADM/0301100100_UNITATS_ADM_POLIGONS.json", quiet = TRUE)
+res_ciutat <- restot |> 
+  group_by(Camp) |> 
+  summarise(res = sum(Nombre)) |> 
+  ungroup() |> 
+  pivot_wider(names_from = Camp, values_from = res) |> 
+  select(-c(Electors, Votants, Nuls)) |> 
+  mutate(across(-`Vots vàlids`, \(x) x/`Vots vàlids`)) |> 
+  select(-`Vots vàlids`) |> 
+  pivot_longer(everything(), names_to = "camp", values_to = "res") |> 
+  filter(res >= .03 | camp == "Blancs")
+palette_partits <- c("PSC-CP" = "#E73B39", "TriasxBCN" = "#00C3B2",
+                     "ERC-AM" = "#FFB232", "BCOMU-C" = "#E65C56",
+                     "PP" = "#0bb2ff", "VOX" = "#63BE21",
+                     "CUP-AMUNT" = "#ffed00", "Blancs" = "gray")
+ggplot(res_ciutat, aes(reorder(camp, res), res, fill = camp)) + 
+  geom_bar(stat = "identity") + 
+  scale_fill_manual("", values = palette_partits) + 
+  scale_y_continuous(labels = scales::label_percent()) + 
+  theme_minimal() + 
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+
+```
+
+
+Fins aquí molt bé. Ara toca mesurar la diferència amb districtes, barris i seccions censals. Com ho fem? Doncs prou senzill: calculant la diferència en valor absolut entre el percentatge a nivell de districte, barri o secció censal i el total de la ciutat i sumant-ho. Com més alt és el resultat, més diferència.
+
+$dif = \sum_{i = 1}^{n}  |x_i - xciutat_i|$
+
+```{r}
+res_ciutat <- rename(res_ciutat, "res_ciutat" = "res")
+
+res_districte <- restot |> 
+  group_by(Camp, Nom_Districte) |> 
+  summarise(res = sum(Nombre)) |> 
+  ungroup() |> 
+  pivot_wider(id_cols = Nom_Districte, names_from = Camp, values_from = res) |> 
+  select(-c(Electors, Votants, Nuls)) |> 
+  mutate(across(-c(`Vots vàlids`, Nom_Districte), \(x) x/`Vots vàlids`)) |> 
+  select(-`Vots vàlids`) |> 
+  pivot_longer(-Nom_Districte, names_to = "camp", values_to = "res") |> 
+  left_join(res_ciutat, by = "camp") |> 
+  filter(res_ciutat >= .03 | camp == "Blancs") |> 
+  mutate(absdif = abs(res-res_ciutat)) |> 
+  group_by(Nom_Districte) |> 
+  summarise(dif = sum(absdif))
+
+res_barri <- restot |> 
+  group_by(Camp, Nom_Barri) |> 
+  summarise(res = sum(Nombre)) |> 
+  ungroup() |> 
+  pivot_wider(id_cols = Nom_Barri, names_from = Camp, values_from = res) |> 
+  select(-c(Electors, Votants, Nuls)) |> 
+  mutate(across(-c(`Vots vàlids`, Nom_Barri), \(x) x/`Vots vàlids`)) |> 
+  select(-`Vots vàlids`) |> 
+  pivot_longer(-Nom_Barri, names_to = "camp", values_to = "res") |> 
+  left_join(res_ciutat, by = "camp") |> 
+  filter(res_ciutat >= .03 | camp == "Blancs") |> 
+  mutate(absdif = abs(res-res_ciutat)) |> 
+  group_by(Nom_Barri) |> 
+  summarise(dif = sum(absdif))
+
+res_seccens <- restot |> 
+  pivot_wider(id_cols = c(Nom_Districte, Nom_Barri, Seccio_Censal), names_from = Camp, values_from = Nombre) |>  
+  select(-c(Electors, Votants, Nuls)) |> 
+  mutate(across(-c(`Vots vàlids`, Nom_Barri, Nom_Districte, Seccio_Censal), \(x) x/`Vots vàlids`)) |> 
+  select(-`Vots vàlids`) |> 
+  pivot_longer(-c(Nom_Districte, Nom_Barri, Seccio_Censal), names_to = "camp", values_to = "res") |> 
+  left_join(res_ciutat, by = "camp") |> 
+  filter(res_ciutat >= .03 | camp == "Blancs") |> 
+  mutate(absdif = abs(res-res_ciutat)) |> 
+  group_by(Nom_Districte, Nom_Barri, Seccio_Censal) |> 
+  summarise(dif = sum(absdif))
+```
+
+
+
+### Districtes
+
+
+```{r}
+#| fit-height: 8
+#| fig-width: 8
+unitats |> 
+  filter(SCONJ_DESC == "Districte") |> 
+  select(NOM) |> 
+  left_join(res_districte, by = c("NOM" = "Nom_Districte")) |> 
+  tm_shape() + 
+  tm_polygons(col = "dif",
+              palette = "viridis") + 
+  tm_layout(frame = FALSE,
+            legend.format=list(fun=function(x) round(x*100,0)))
+```
+
+
+Sense cap sorpresa, Sarrià-Sant Gervasi i Nou Barris tenen les diferències més grans. Horta-Guinardó i Sant Martí les més petites. Malgrat tot, un districte és molt gran i molt divers: què passa si ho mirem a nivell de barri?
+
+
+### Barris
+
+```{r}
+#| fit-height: 8
+#| fig-width: 8
+unitats |> 
+  filter(SCONJ_DESC == "Barri") |> 
+  select(NOM) |> 
+  left_join(res_barri, by = c("NOM" = "Nom_Barri")) |> 
+  tm_shape() + 
+  tm_polygons(col = "dif",
+              palette = "viridis") + 
+  tm_layout(frame = FALSE,
+            legend.format=list(fun=function(x) x*100))
+```
+
+Vaja, la cosa canvia força, no? Veiem que les diferències més grans ara són explícitament a Pedralbes i a les Tres Torres (més grans del 70%!) i les més petites a la Vila Olímpica, Can Baró i Navas. La resta de Sarrià-Sant Gervasi tenen diferències força grans i a Nou Barris ronden entre el 30 i el 60%. Cap sorpresa, tampoc.
+
+### Seccions censals
+
+Anem al detall: quines meses electorals són més semblants a tota la ciutat? A quins col·legis les sensacions dels apoderats van ser les més encertades?
+
+
+```{r}
+#| fit-height: 8
+#| fig-width: 8
+# codis de districte i barri
+
+codis <- unitats |> 
+  st_drop_geometry() |> 
+  filter(SCONJ_DESC == "Districte") |> 
+  select(NOM, DISTRICTE) |> 
+  rename("Nom_Districte" = "NOM")
+coba <- unitats |> 
+  st_drop_geometry() |> 
+  filter(SCONJ_DESC == "Barri") |> 
+  select(NOM, BARRI) |> 
+  rename("Nom_Barri" = "NOM")
+
+res_seccens <- res_seccens |> 
+  left_join(codis, by = "Nom_Districte") |> 
+  left_join(coba, by = "Nom_Barri") |> 
+  mutate(Seccio_Censal = str_pad(Seccio_Censal, 3, pad = 0))
+
+unitats |> 
+  filter(SCONJ_DESC == "Secció censal") |> 
+  left_join(rename(res_seccens, "SEC_CENS" = "Seccio_Censal"),  by = c("SEC_CENS", "BARRI", "DISTRICTE")) |> 
+  tm_shape() + 
+  tm_fill(col = "dif",
+              palette = "viridis",
+              n = 8) + 
+  tm_layout(frame = FALSE,
+            legend.format=list(fun=function(x) x*100))
+```
+
+
+
+Per seccions, veiem exactament el mateix però apareixen algunes seccions censals amb més diferències a Sant Gervasi-Galvany amb diferències de més de 80 punts percentuals. Ara, on són les seccions censals amb menys diferència?
+
+
+```{r}
+#| fit-height: 8
+#| fig-width: 8
+sec_mdif <- unitats |> 
+  filter(SCONJ_DESC == "Secció censal") |> 
+  left_join(rename(res_seccens, "SEC_CENS" = "Seccio_Censal"),  by = c("SEC_CENS", "BARRI", "DISTRICTE")) |> 
+  filter(dif <= 0.1)
+
+unitats |> 
+  filter(SCONJ_DESC == "Barri") |> 
+  tm_shape() + 
+  tm_borders() + 
+  tm_shape(sec_mdif) + 
+  tm_polygons(col = "red4") + 
+  tm_layout(frame = FALSE)
+```
+
+
+En veiem unes quantes a Sants i a Les Corts i en dues línies verticals al Baix Guinardó, la Dreta de l'Eixample, la Sagrada Família, el Fort Pienc i Navas i el Congrés i els Indians.
+
+Així, quin recompte haurem d'anar a veure el 2027 si volem saber què sortirà? Comptant que les coses no canviïn gaire, aquí en teniu uns quants.
