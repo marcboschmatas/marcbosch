@@ -2,7 +2,7 @@
 title: "Marc Bosch i Matas"
 image: imageofthecity.jpeg
 about:
-  template: jolla
+  template: solana
   links:
     - icon: twitter
       text: Twitter
